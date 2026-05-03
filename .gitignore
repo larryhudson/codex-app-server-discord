@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+.sessions.json
+tool-events.jsonl
+.DS_Store
