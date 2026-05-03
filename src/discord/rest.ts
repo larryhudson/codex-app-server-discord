@@ -1,4 +1,5 @@
 const DISCORD_API = "https://discord.com/api/v10";
+export const DISCORD_MESSAGE_LIMIT = 2000;
 
 export class DiscordRest {
   constructor(private readonly token: string) {}
@@ -6,14 +7,20 @@ export class DiscordRest {
   async createMessage(channelId: string, content: string): Promise<{ id: string }> {
     return this.request(`/channels/${channelId}/messages`, {
       method: "POST",
-      body: JSON.stringify({ content: truncateDiscordMessage(content) }),
+      body: JSON.stringify({ content: validateDiscordMessage(content) }),
     });
   }
 
   async editMessage(channelId: string, messageId: string, content: string): Promise<void> {
     await this.request(`/channels/${channelId}/messages/${messageId}`, {
       method: "PATCH",
-      body: JSON.stringify({ content: truncateDiscordMessage(content) }),
+      body: JSON.stringify({ content: validateDiscordMessage(content) }),
+    });
+  }
+
+  async deleteMessage(channelId: string, messageId: string): Promise<void> {
+    await this.request(`/channels/${channelId}/messages/${messageId}`, {
+      method: "DELETE",
     });
   }
 
@@ -44,9 +51,12 @@ export class DiscordRest {
   }
 }
 
-export function truncateDiscordMessage(content: string): string {
-  if (content.length <= 2000) {
-    return content;
+function validateDiscordMessage(content: string): string {
+  if (!content) {
+    throw new Error("Discord message content cannot be empty");
   }
-  return `${content.slice(0, 1996)}...`;
+  if (content.length > DISCORD_MESSAGE_LIMIT) {
+    throw new Error(`Discord message content exceeds ${DISCORD_MESSAGE_LIMIT} characters`);
+  }
+  return content;
 }

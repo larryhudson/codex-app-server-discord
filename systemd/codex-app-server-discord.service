@@ -1,0 +1,19 @@
+[Unit]
+Description=Codex app-server Discord bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=larry
+Group=larry
+WorkingDirectory=/home/larry/github.com/larryhudson/codex-app-server-discord
+EnvironmentFile=/etc/codex-app-server-discord.env
+Environment=NODE_ENV=production
+Environment=PATH=/home/larry/.nvm/versions/node/v24.14.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/larry/.nvm/versions/node/v24.14.0/bin/npm run serve
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

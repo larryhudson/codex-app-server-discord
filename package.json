@@ -7,7 +7,9 @@
     "dev": "tsx src/dev.ts",
     "bridge": "tsx src/index.ts",
     "probe:tools": "tsx src/probe-tool-events.ts",
-    "build": "tsc --noEmit"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "serve": "node dist/serve.js"
   },
   "dependencies": {
     "ws": "^8.18.0"

@@ -82,6 +82,21 @@ export class CodexClient {
     return this.connectPromise;
   }
 
+  disconnect(): void {
+    this.initialized = false;
+    this.connectPromise = undefined;
+    const socket = this.socket;
+    this.socket = undefined;
+    socket?.removeAllListeners();
+    socket?.close();
+    this.rejectAll(new Error("Codex app-server client disconnected"));
+  }
+
+  async reconnect(): Promise<void> {
+    this.disconnect();
+    await this.connect();
+  }
+
   async startThread(params: { cwd: string }): Promise<string> {
     const result = await this.request<{ thread?: { id?: string } }>("thread/start", {
       cwd: params.cwd,

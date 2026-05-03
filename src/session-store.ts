@@ -1,8 +1,9 @@
 import { readFile, rename, writeFile } from "node:fs/promises";
 
-type StoredSession = {
+export type StoredSession = {
   threadId: string;
   cwd: string;
+  backendId?: string;
 };
 
 type SessionFile = {

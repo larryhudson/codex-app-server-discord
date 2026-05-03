@@ -1,58 +1,49 @@
 # systemd
 
-This example runs `npm run dev`, which starts both Codex app-server and the Discord bridge. It assumes the repo lives at `/opt/codex-app-server-discord` and the environment file lives at `/etc/codex-app-server-discord.env`.
+This service runs `npm run serve`, which starts both Codex app-server and the Discord bridge from the compiled `dist/` output.
+
+The checked-in unit at `systemd/codex-app-server-discord.service` is configured for this checkout:
+
+- repo: `/home/larry/github.com/larryhudson/codex-app-server-discord`
+- user/group: `larry:larry`
+- Node/npm/Codex path: `/home/larry/.nvm/versions/node/v24.14.0/bin`
+- env file: `/etc/codex-app-server-discord.env`
 
 ## Environment
 
-Create `/etc/codex-app-server-discord.env`:
+Create `/etc/codex-app-server-discord.env`, or copy the repo-local `.env` there:
 
 ```sh
 DISCORD_BOT_TOKEN=your_bot_token
 DISCORD_CHANNEL_ID=
 CODEX_APP_SERVER_URL=ws://127.0.0.1:45123
-CODEX_CWD=/opt/codex-app-server-discord/workspace
-CODEX_BIN=/usr/local/bin/codex
-SESSION_STORE_PATH=/var/lib/codex-app-server-discord/sessions.json
+CODEX_HOME=/home/larry/.codex
+CODEX_AUTH_PROFILES=larryhudsonatheydotcom|/home/larry/.codex-subscriptions/larryhudsonatheydotcom/auth.json;harryludsonatgmaildotcom|/home/larry/.codex-subscriptions/harryludsonatgmaildotcom/auth.json
+CODEX_CWD=/home/larry/.openclaw/workspace
+CODEX_BIN=/home/larry/.nvm/versions/node/v24.14.0/bin/codex
+SESSION_STORE_PATH=/home/larry/github.com/larryhudson/codex-app-server-discord/.sessions.json
 ```
 
-Adjust `CODEX_BIN` to the output of `which codex` on the target machine. If `codex` is installed under a user home directory, use that absolute path.
-
-Create the state directory:
+Recommended permissions:
 
 ```sh
-sudo mkdir -p /var/lib/codex-app-server-discord
-sudo chown -R codex-discord:codex-discord /var/lib/codex-app-server-discord
+sudo chown root:root /etc/codex-app-server-discord.env
+sudo chmod 600 /etc/codex-app-server-discord.env
 ```
 
 ## Service
 
-Create `/etc/systemd/system/codex-app-server-discord.service`:
-
-```ini
-[Unit]
-Description=Codex app-server Discord bridge
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=codex-discord
-Group=codex-discord
-WorkingDirectory=/opt/codex-app-server-discord
-EnvironmentFile=/etc/codex-app-server-discord.env
-Environment=NODE_ENV=production
-Environment=PATH=/usr/local/bin:/usr/bin:/bin
-ExecStart=/usr/bin/npm run dev
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Then enable it:
+Build the production output:
 
 ```sh
+npm install
+npm run build
+```
+
+Install and enable the unit:
+
+```sh
+sudo cp systemd/codex-app-server-discord.service /etc/systemd/system/codex-app-server-discord.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now codex-app-server-discord
 sudo systemctl status codex-app-server-discord

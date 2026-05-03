@@ -7,20 +7,24 @@ import { DiscordRest } from "./discord/rest.js";
 import { SessionStore } from "./session-store.js";
 
 try {
-  loadEnvFile(".env");
+  loadEnvFile("/etc/codex-app-server-discord.env");
 } catch {
-  // Running with exported environment variables is fine too.
+  try {
+    loadEnvFile(".env");
+  } catch {
+    // Running with exported environment variables is fine too.
+  }
 }
 
 const config = loadConfig();
 const discordGateway = new DiscordGateway(config.discordToken);
 const discordRest = new DiscordRest(config.discordToken);
-const codex = new CodexClient(config.codexUrl);
+const codexBackends = [{ id: "shared", client: new CodexClient(config.codexUrl) }];
 const sessions = new SessionStore(config.sessionStorePath);
 
-await codex.connect();
+await Promise.all(codexBackends.map((backend) => backend.client.connect()));
 
-const bridge = new DiscordCodexBridge(discordGateway, discordRest, codex, sessions, {
+const bridge = new DiscordCodexBridge(discordGateway, discordRest, codexBackends, sessions, {
   allowedChannelId: config.discordChannelId,
   codexCwd: config.codexCwd,
 });
