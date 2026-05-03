@@ -10,7 +10,7 @@ Copy `.env.example` to `.env` and set:
 
 ```sh
 DISCORD_BOT_TOKEN=your_bot_token
-CODEX_APP_SERVER_URL=ws://127.0.0.1:4500
+CODEX_APP_SERVER_URL=ws://127.0.0.1:45123
 CODEX_CWD=/path/to/the/repo/codex/should/work/in
 ```
 
@@ -34,6 +34,8 @@ npm run dev
 ```sh
 npm run bridge
 ```
+
+For a Linux systemd setup, see [docs/systemd.md](docs/systemd.md).
 
 ## Sessions
 

@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { loadEnvFile } from "node:process";
 import WebSocket from "ws";
+import { DEFAULT_CODEX_APP_SERVER_URL } from "./config.js";
 
 try {
   loadEnvFile(".env");
@@ -8,11 +9,12 @@ try {
   // Running with exported environment variables is fine too.
 }
 
-const codexUrl = process.env.CODEX_APP_SERVER_URL ?? "ws://127.0.0.1:4500";
+const codexUrl = process.env.CODEX_APP_SERVER_URL ?? DEFAULT_CODEX_APP_SERVER_URL;
+const codexBin = process.env.CODEX_BIN ?? "codex";
 const children: ChildProcess[] = [];
 let shuttingDown = false;
 
-const codex = spawn("codex", ["app-server", "--listen", codexUrl], {
+const codex = spawn(codexBin, ["app-server", "--listen", codexUrl], {
   stdio: "inherit",
   env: process.env,
 });
@@ -23,6 +25,10 @@ codex.on("exit", (code, signal) => {
     console.error(`codex app-server exited (${code ?? signal})`);
     shutdown(code ?? 1);
   }
+});
+codex.on("error", (error) => {
+  console.error(`failed to start codex app-server with ${codexBin}:`, error);
+  shutdown(1);
 });
 
 await waitForWebSocket(codexUrl, 15_000);

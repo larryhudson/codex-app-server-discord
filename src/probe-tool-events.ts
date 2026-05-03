@@ -1,6 +1,7 @@
 import { appendFile, writeFile } from "node:fs/promises";
 import { loadEnvFile } from "node:process";
 import WebSocket from "ws";
+import { DEFAULT_CODEX_APP_SERVER_URL } from "./config.js";
 
 type JsonRpcResponse = {
   id: number;
@@ -29,7 +30,7 @@ try {
   // Running with exported environment variables is fine too.
 }
 
-const url = process.env.CODEX_APP_SERVER_URL ?? "ws://127.0.0.1:4500";
+const url = process.env.CODEX_APP_SERVER_URL ?? DEFAULT_CODEX_APP_SERVER_URL;
 const cwd = process.env.CODEX_CWD ?? process.cwd();
 const outputPath = process.env.TOOL_EVENT_PROBE_PATH ?? "tool-events.jsonl";
 const prompt =
